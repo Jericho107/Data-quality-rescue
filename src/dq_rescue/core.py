@@ -52,15 +52,33 @@ def inspect(rows: Iterable[Transaction]) -> list[Defect]:
     return defects
 
 
+def partition(rows: Iterable[Transaction]) -> tuple[list[Transaction], list[Transaction], list[Defect]]:
+    items = list(rows)
+    defects = inspect(items)
+    rejected_ids = {
+        defect.transaction_id
+        for defect in defects
+        if defect.severity in {"critical", "high"}
+    }
+    accepted = [row for row in items if row.transaction_id not in rejected_ids]
+    quarantined = [row for row in items if (row.transaction_id or "<missing>") in rejected_ids]
+    if len(accepted) + len(quarantined) != len(items):
+        raise ValueError("partition reconciliation failed")
+    return accepted, quarantined, defects
+
+
 def fail_closed(rows: Iterable[Transaction]) -> None:
-    defects = inspect(rows)
+    _, quarantined, defects = partition(rows)
     material = [
         defect
         for defect in defects
         if defect.severity in {"critical", "high"}
     ]
-    if material:
-        raise ValueError(f"material data-quality defects: {len(material)}")
+    if material or quarantined:
+        raise ValueError(
+            f"material data-quality defects: {len(material)}; "
+            f"quarantined rows: {len(quarantined)}"
+        )
 
 
 def quality_report(rows: Iterable[Transaction]) -> dict[str, object]:
