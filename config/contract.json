@@ -1,0 +1,6 @@
+{
+  "project": "data-quality-rescue",
+  "mode": "fail_closed",
+  "synthetic": true,
+  "brand": "Pretoria BI"
+}
