@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
-from typing import Iterable
 
 VALID_STATUS = {"paid", "pending", "refunded"}
 
@@ -30,10 +30,14 @@ def inspect(rows: Iterable[Transaction]) -> list[Defect]:
     for row in rows:
         identifier = row.transaction_id or "<missing>"
         if not row.transaction_id:
-            defects.append(Defect(identifier, "missing_transaction_id", "critical"))
+            defects.append(
+                Defect(identifier, "missing_transaction_id", "critical")
+            )
             continue
         if row.transaction_id in seen:
-            defects.append(Defect(identifier, "duplicate_business_key", "critical"))
+            defects.append(
+                Defect(identifier, "duplicate_business_key", "critical")
+            )
         seen.add(row.transaction_id)
         if not row.customer_id:
             defects.append(Defect(identifier, "missing_customer", "high"))
@@ -50,7 +54,11 @@ def inspect(rows: Iterable[Transaction]) -> list[Defect]:
 
 def fail_closed(rows: Iterable[Transaction]) -> None:
     defects = inspect(rows)
-    material = [d for d in defects if d.severity in {"critical", "high"}]
+    material = [
+        defect
+        for defect in defects
+        if defect.severity in {"critical", "high"}
+    ]
     if material:
         raise ValueError(f"material data-quality defects: {len(material)}")
 
@@ -58,15 +66,15 @@ def fail_closed(rows: Iterable[Transaction]) -> None:
 def quality_report(rows: Iterable[Transaction]) -> dict[str, object]:
     items = list(rows)
     defects = inspect(items)
-    severity = Counter(d.severity for d in defects)
-    rules = Counter(d.rule for d in defects)
+    severity = Counter(defect.severity for defect in defects)
+    rules = Counter(defect.rule for defect in defects)
     return {
         "rows": len(items),
         "defects": len(defects),
         "severity": dict(sorted(severity.items())),
         "rules": dict(sorted(rules.items())),
         "clean": not defects,
-        "detail": [asdict(d) for d in defects],
+        "detail": [asdict(defect) for defect in defects],
     }
 
 
