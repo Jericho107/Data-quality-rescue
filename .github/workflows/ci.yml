@@ -32,5 +32,10 @@ jobs:
         run: pytest -q
       - name: Smoke evidence
         run: python -m dq_rescue.cli smoke
+      - name: Generate rescue evidence
+        run: |
+          python -m dq_rescue.cli report
+          test -s output/data_quality_rescue.html
+          test -s output/dq_evidence.sqlite
       - name: Reverse-test evidence
         run: python -m dq_rescue.cli reverse-test
