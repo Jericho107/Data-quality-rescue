@@ -22,7 +22,10 @@ def rescue_report_html(database_path: str | Path) -> str:
 <h1>Data Quality Rescue</h1>
 <p><strong>Run:</strong> {escape(str(result['run_id']))}</p>
 <p><strong>Release status:</strong> {escape(str(result['status']))}</p>
-<p>Source rows: {result['source_rows']} · Accepted: {result['accepted_rows']} · Quarantined: {result['quarantined_rows']}</p>
+<p>
+Source rows: {result['source_rows']} · Accepted: {result['accepted_rows']} ·
+Quarantined: {result['quarantined_rows']}
+</p>
 <h2>Defect evidence</h2>
 <table><thead><tr><th>Transaction</th><th>Rule</th><th>Severity</th></tr></thead><tbody>{defects}</tbody></table>
 <p><small>Synthetic data-quality incident.</small></p>
