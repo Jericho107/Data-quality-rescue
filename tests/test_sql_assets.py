@@ -31,7 +31,7 @@ def test_defect_summary_sql_exposes_material_rules(tmp_path):
         rows = connection.execute(_sql("20_defect_summary.sql")).fetchall()
 
     assert rows
-    assert {row[1] for row in rows} >= {"arithmetic_check", "customer_id_required"}
+    assert {row[1] for row in rows} >= {"arithmetic_check", "missing_customer"}
 
 
 def test_quarantine_reconciliation_sql_has_zero_delta(tmp_path):
